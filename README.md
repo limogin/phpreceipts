@@ -5,8 +5,10 @@ Script para generar recibos de cuotas para comunidades de vecinos.
 
 # Instalación
 
-Es necesario disponer de un intérprete php versión 4 o superior. Por ejemplo procedente de una instalación XAMPP (https://www.apachefriends.org/es/index.html) 
-Es neceario disponer de la librería fpdf http://www.fpdf.org/ 
+Es necesario disponer de un intérprete php versión 4 o superior. Por ejemplo procedente de una instalación XAMPP (https://www.apachefriends.org/es/index.html)
+ 
+Es neceario disponer de la librería fpdf http://www.fpdf.org/
+ 
 Descargar el paquete y copiarlo en la carpeta ./fpdf/ 
 
 
