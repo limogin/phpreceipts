@@ -5,15 +5,11 @@ Script para generar recibos de cuotas para comunidades de vecinos.
 
 # Instalación
 
-Es necesario disponer de un intérprete php versión 4 o superior. Por ejemplo procedente de una instalación XAMPP (https://www.apachefriends.org/es/index.html)
- 
-Es neceario disponer de la librería fpdf http://www.fpdf.org/
- 
+Es necesario disponer de un intérprete php versión 4 o superior. Por ejemplo procedente de una instalación XAMPP (https://www.apachefriends.org/es/index.html) 
+Es necesario disponer de la librería fpdf http://www.fpdf.org/ 
 Descargar el paquete y copiarlo en la carpeta ./fpdf/ 
 
-
 # Configuración 
-
 
 Son necesarios dos archivos, config.txt con los datos de la comunidad y users.txt con los datos de los vecinos.
 
@@ -30,8 +26,8 @@ Cada línea contiene los datos de un vecino, nombre, piso o puerto e importe. Sep
 
 Ejemplo:
 
-Mi Nombre 1 ; 1o 1a; 32
-Mi Nombre 2 : 1o 2a; 32 
+Mi Nombre 1 ; 1o 1a ; 32
+Mi Nombre 2 : 1o 2a ; 32 
  
 
 # Forma de Uso
@@ -45,12 +41,16 @@ php receipt.php aportation 2014-04-05 250 7 "Arreglo Escalera"
 Para generar una aportación ordinaria mensual 
 php receipt.php month [year]-[month] [from-receipt-number]
 
+Para generar una aportación ordinaria mensual en un período 
+php receipt.php period [from-year]-[from-month] [to-year]-[to-month] [from-receipt-number]
+
 Ejemplo:
 
 php receipt.php 2014-10 12
 
 Para generar todas las aportaciones del año
 php receipt.php year [year] [from-receipt-number]
+
 
 Ejemplo:
 
