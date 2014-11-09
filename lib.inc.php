@@ -74,6 +74,7 @@ class Receipt_PDF extends FPDF {
 	}
 	
 	function OpenTag($tag, $attr) {
+		// Etiqueta de apertura
 		if($tag=='B' || $tag=='I' || $tag=='U')
 			$this->SetStyle($tag,true);
 		if($tag=='A')

@@ -19,6 +19,7 @@ class Receipt {
 	                         '9'=>'Septiembre', '10'=>'Ocubre', '11'=>'Noviembre', '12'=>'Diciembre');
 	private $current_num  = 0;
 	private $current_year = '2014';
+	private $to_period    = '';
 	private $concept      = '';
 	
 	public function load_config () {
@@ -90,7 +91,7 @@ class Receipt {
 	
 	public function content (&$params) {
 		
-		$_d  = 'A   <b>' . $params['day'] . '</b>   de   <b>' . $this->months[(int)$params['month']] . '</b>   de   <b>' . $params['year'] . '</b>';
+		$_d  = 'Barcelona a   <b>' . $params['day'] . '</b>   de   <b>' . $this->months[(int)$params['month']] . '</b>   de   <b>' . $params['year'] . '</b>';
 		$this->pdf->setFont('Arial','',12);
 		$this->pdf->setXy (10,30);
 		$this->pdf->WriteHTML($_d);
@@ -106,7 +107,7 @@ class Receipt {
 		$this->pdf->WriteHTML($_d);
 		
 		if ($this->concept=='') { 
-		 $_d = "En concepto de la cuota que corresponde al mes de <b>".$this->months[$params['month']]."</b> ".$params['year'];
+		 $_d = "En concepto de la cuota que corresponde al mes de <b>".$this->months[(int)$params['month']]."</b> ".$params['year'];
 		} else {
 		 $_d = "En concepto de <b>".$this->concept."</b>";	
 		}
@@ -163,9 +164,10 @@ class Receipt {
 				$floor  = trim ($floor);
 				$amount = trim ($this->amount);
 					
-				$d = 'pdfs/'.strtolower(str_replace(" ","_",$floor));
+				$d = 'pdfs/'.$this->current_year;
 				if (!is_dir($d)) mkdir ($d);
-				$dy = $d . '/'.$this->current_year;
+				$dy = $d . '/'.strtolower(str_replace(" ","_",$floor));
+				
 				if (!is_dir($dy)) mkdir ($dy);
 				$f = $dy.'/'.$this->current_num . '_' . $this->current_date . '_' . strtolower(str_replace(" ","_",$floor)).'_pending.pdf';
 					
@@ -193,9 +195,9 @@ class Receipt {
 			$floor  = trim ($floor);
 			$amount = trim ($amout);
 					
-			$d = 'pdfs/'.strtolower(str_replace(" ","_",$floor));
+            $d = 'pdfs/'.$year;
 			if (!is_dir($d)) mkdir ($d);
-			$dy = $d . '/'.$year;
+			$dy = $d . '/'.strtolower(str_replace(" ","_",$floor));			
 			if (!is_dir($dy)) mkdir ($dy);
 			$f = $dy.'/'.$this->current_num . '_' . $year . sprintf("%02d",$month) . '_' . strtolower(str_replace(" ","_",$floor)).'_pending.pdf';
 					
@@ -209,6 +211,43 @@ class Receipt {
 			}
 	}
 	
+	public function from_period () {
+	
+		$year    = $this->current_year;
+		$users   = file_get_contents ('users.txt');
+		$entries = explode ("\n",$users);
+	
+		list ($year,$month)     = explode ("-",$year);
+		list ($toyear,$tomonth) = explode ("-",$this->to_period);
+		$this->current_year = $year;
+	
+		for ($cm=$month;$cm<=$tomonth;$cm++) { 
+		  foreach ($entries as $entry) {
+			if (trim($entry)=='') continue;
+			list ($name, $floor, $amout) = explode (";",$entry);
+			$name   = trim ($name);
+			$floor  = trim ($floor);
+			$amount = trim ($amout);
+				
+			$d = 'pdfs/'.$year;
+			if (!is_dir($d)) mkdir ($d);
+			$dy = $d . '/'.strtolower(str_replace(" ","_",$floor));
+			if (!is_dir($dy)) mkdir ($dy);
+			$f = $dy.'/'.$this->current_num . '_' . $year . sprintf("%02d",$cm) . '_' . strtolower(str_replace(" ","_",$floor)).'_pending.pdf';
+				
+			$this->begin_page (
+			 array ('year'=>$year,
+					'month'=>$cm,
+					'day'=>'1',
+					'amount'=>$amount,
+					'user'=>$name,
+					'floor'=>$floor),
+					$f
+			 );
+		}
+	   };
+	}
+		
 	
 	public function from_year () {
 		
@@ -257,10 +296,23 @@ class Receipt {
 		$this->load_config ();
 		
 		switch ($cmd) {
-			case 'year':       $this->from_year ();       break;
-			case 'month':      $this->from_month ();      break;
-			case 'aportation': $this->from_aportation (); break;
-			default:           $this->help ();            break; 
+			case 'year':       
+				$this->from_year ();       
+				break;
+			case 'month':      
+				$this->from_month ();      
+				break;
+			case 'period':
+				$this->to_period   = $argv[3];
+				$this->current_num = $argv[4];     
+				$this->from_period();      
+				break;
+			case 'aportation': 
+				$this->from_aportation (); 
+				break;
+			default:           
+				$this->help ();            
+				break; 
 		}
 		
 	}
@@ -273,8 +325,9 @@ class Receipt {
 		echo "Formato:\n";
 		echo "\tphp receipt.php [command] [options]\n\n";
 		echo "Parametros:\n";
-		echo "\tyear  [year-number] [from-receipt-number] Genera los recibos de todos los vecinos para el periodo indicado.\n";
-		echo "\tmonth [year-number]-[month number] [from-receipt-number] Genera los recibos de todos los vecinos para el periodo indicado.\n";
+		echo "\tyear   [year-number] [from-receipt-number] Genera los recibos de todos los vecinos para el periodo indicado.\n";
+		echo "\tmonth  [year-number]-[month number] [from-receipt-number] Genera los recibos de todos los vecinos para el periodo indicado.\n";
+		echo "\tperiod [from-year-number]-[from-month number] [to-year-number]-[to-month number] [from-receipt-number] Genera los recibos de todos los vecinos para el periodo indicado.\n";
 		echo "\taportation [date] [amount] [from-receipt-number] [concept] Genera un recibo de aportacion extraordinaria para la fecha y con el importe indicado\n\n";
 		echo "\t[from-receipt-number] Numero de recibo, contador para todos los recibos que se genere\n";
 		echo "\t[amount] Importe en EUROS\n";
